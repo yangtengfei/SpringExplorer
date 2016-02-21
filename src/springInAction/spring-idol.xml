@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd"
+	default-init-method="turnOnLights" default-destroy-method="turnOffLights">
+	
+	<!-- 初始化和销毁 Bean,若要设置global 初始化/销毁方法 需要先设置此 bean-->
+	<bean id="auditorium" class="com.springinaction.springidol.Auditorium"
+		init-method="turnOnLights" destroy-method="turnOffLights" />
+
+	<bean id="duke" class="com.springinaction.springidol.Juggler">
+		<constructor-arg value="15"></constructor-arg>
+	</bean>
+
+	<!-- 构造器中多个参数的注入 -->
+	<bean id="poeticDuke" class="com.springinaction.springidol.PoeticJuggler">
+		<constructor-arg value="15"></constructor-arg>
+		<constructor-arg ref="MyMotherLand"></constructor-arg>
+	</bean>
+
+	<bean id="MyMotherLand" class="com.springinaction.springidol.MyMotherLand"></bean>
+
+	<!-- 通过工厂方法创建 Bean -->
+	<bean id="theStage" class="com.springinaction.springidol.Stage"
+		factory-method="getInstance"></bean>
+		
+	<!-- 注入 Bean 属性  setter注入-->
+	<bean id="kenny" class="com.springinaction.springidol.Instrumentalist">
+		<property name="song" value="Jingle Bells"/>
+		<property name="instrument" ref="saxophone"/>
+	</bean>
+	
+	<!-- 使用命名空间 p 装配属性 -->
+	<bean id="kenny2" class="com.springinaction.springidol.Instrumentalist"
+		p:song="Jingle Bells"
+		p:instrument-ref="saxophone"/>
+	
+	<bean id="saxophone" class="com.springinaction.springidol.Saxophone"/>
+	<bean id="piano" class="com.springinaction.springidol.Piano"/>
+	
+	<!-- 内部 Bean 使Piano不被公共使用 -->
+	<bean id="Tom" class="com.springinaction.springidol.Instrumentalist">
+		<property name="song" value="Jingle Bells"/>
+		<property name="instrument">
+			<bean class="com.springinaction.springidol.Piano"/>
+		</property>
+	</bean>
+	
+	<bean id="hank" class="com.springinaction.springidol.OneManBand">
+		<property name="instruments">
+			<list>
+				<ref bean="piano"/>
+				<ref bean="saxophone"/>
+			</list>
+		</property>
+	</bean>
+	
+	<bean id="hankForMap" class="com.springinaction.springidol.OneManBandForMap">
+		<property name="instruments">
+			<map>
+				<entry key="Piano" value-ref="piano"/>
+				<entry key="Saxophone" value-ref="saxophone"/>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="audience" class="com.springinaction.springidol.Audience"></bean>
+
+	<aop:config>
+		<aop:aspect ref="audience">
+			<aop:before pointcut="execution(* com.springinaction.springidol.Performer.perform(..))" 
+			method="takeSeats"/>
+			
+			<aop:before pointcut="execution(* com.springinaction.springidol.Performer.perform(..))" 
+			method="turnOffCellPhones"/>
+
+			<aop:after-returning pointcut="execution(* com.springinaction.springidol.Performer.perform(..))" 
+			method="appuld"/>
+			
+			<aop:after-throwing pointcut="execution(* com.springinaction.springidol.Performer.perform(..))" 
+			method="demandRefund"/>
+		</aop:aspect>
+	</aop:config>
+
+</beans>
